@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ICT 상담 기록 조회</title>
+    <style>
+        :root{--navy:#1c2431;--navy-600:#17202c;--navy-300:#2a3547;--gray-50:#f7f8fa;--gray-100:#eef1f5;--gray-200:#e3e7ee;--gray-400:#b9c0cf;--text:#1b2230;--muted:#6b7484;--white:#ffffff;--radius-lg:14px;--radius-md:10px;--radius-sm:8px;--shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow-md:0 6px 20px rgba(0,0,0,.08)}
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;font-family:"Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--text);background:var(--white)}
+
+        /* Layout */
+        .container{max-width:1200px;min-width:1024px;margin:0 auto;padding:0 24px}
+        header{position:sticky;top:0;z-index:20;background:var(--white);box-shadow:var(--shadow-sm)}
+        .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+        .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--navy);letter-spacing:.5px}
+        .brand .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--navy),var(--navy-300));display:inline-block}
+        .brand .name{font-size:26px}
+        .menu{display:flex;gap:36px }
+        .menu a{color:var(--text);text-decoration:none;font-weight:600}
+        .menu a:hover{color:var(--navy)}
+
+        main{padding:36px 0 56px}
+
+        /* Search */
+        .search-wrap{margin:8px 0 28px}
+        .search-bar{display:flex;align-items:center;gap:12px;background:var(--white);border:1.5px solid var(--gray-200);border-radius:40px;padding:10px 14px 10px 18px;box-shadow:var(--shadow-sm)}
+        .search-bar input{flex:1;border:0;outline:0;font-size:16px;padding:8px 4px}
+        .search-btn{width:44px;height:44px;border-radius:50%;border:0;background:var(--navy);color:#fff;display:grid;place-items:center;cursor:pointer}
+        .search-btn:hover{background:var(--navy-600)}
+
+        /* Filters */
+        .filters{display:flex;align-items:center;gap:10px;color:var(--muted);margin:6px 0 18px}
+        .filters .label{font-weight:700;color:var(--text);margin-right:8px}
+        .date-input{display:flex;align-items:center;gap:10px}
+        .date{height:40px;border:1px solid var(--gray-200);border-radius:8px;padding:0 12px;background:#fff;color:var(--text)}
+        .dash{color:var(--gray-400)}
+        .query-btn{height:40px;border:0;background:var(--navy);color:#fff;border-radius:8px;padding:0 14px;cursor:pointer}
+        .query-btn:hover{background:var(--navy-600)}
+        .order{margin-left:auto;display:flex;gap:14px;color:var(--muted)}
+
+        /* Table Card */
+        .card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);overflow:hidden}
+        table{width:100%;border-collapse:separate;border-spacing:0}
+        thead th{background:#f3f5f9;color:var(--navy);text-align:left;padding:14px 16px;font-size:14px;border-bottom:1px solid var(--gray-200)}
+        tbody td{padding:12px 16px;border-bottom:1px solid var(--gray-200);font-size:14px;color:var(--text)}
+        tbody tr:nth-child(odd){background:#fff}
+        tbody tr:nth-child(even){background:#fbfcfe}
+        .status{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;font-weight:700}
+        .status.progress{background:#e9f0ff;color:#3350ff}
+        .status.stop{background:#fff4e5;color:#cc7a00}
+        .status.done{background:#e9fbef;color:#1a7f43}
+        .type-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2f7;color:#2a3547}
+        .memo{color:var(--muted)}
+        .confirm-btn{height:36px;border:1px solid var(--gray-200);background:#fff;border-radius:8px;padding:0 10px;cursor:pointer;color:var(--text)}
+        .confirm-btn:hover{border-color:var(--navy);color:var(--navy)}
+
+        .table-actions{display:flex;justify-content:flex-end;align-items:center;padding:10px 16px;gap:12px}
+        .add-target{display:inline-flex;align-items:center;gap:8px;border:0;background:#fff;padding:10px 12px;border-radius:8px;color:var(--navy);cursor:pointer;border:1px dashed var(--gray-200)}
+
+        /* Footer menu */
+        footer{margin-top:36px;background:var(--gray-50);border-top:1px solid var(--gray-200)}
+        .footer-grid{display:grid;grid-template-columns:1fr 3fr;gap:24px;align-items:center;padding:32px 0}
+        .category{font-weight:800;color:var(--text)}
+        .icon-row{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+        .icon-card{display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:18px 12px}
+        .icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--navy),var(--navy-300));display:grid;place-items:center;color:#fff;font-weight:800}
+        .icon-label{font-weight:700}
+
+        /* Responsive floor (min 1024px primary) */
+        @media (max-width:1200px){.container{padding:0 16px}}
+        @media (max-width:1024px){body{min-width:1024px}}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav">
+            <div class="brand" aria-label="ICT">
+                <span class="mark" aria-hidden="true"></span>
+                <span class="name">ICT</span>
+            </div>
+            <nav class="menu" aria-label="주요 메뉴" >
+                <a href="#">슈퍼비전</a>
+                <a href="#">상담 기록 조회</a>
+                <a href="#">마이페이지</a>
+                <a href="#">작성 가이드</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search -->
+        <div class="search-wrap">
+            <div class="search-bar" role="search">
+                <input type="text" placeholder="대상자를 입력하세요" aria-label="대상자 검색" />
+                <button class="search-btn" aria-label="검색">
+                    <!-- magnifier -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15.5 15.5L21 21" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="10.5" cy="10.5" r="6.5" stroke="white" stroke-width="2"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <span class="label">상담일자</span>
+            <div class="date-input">
+                <input class="date" type="date" aria-label="시작일" />
+                <span class="dash">~</span>
+                <input class="date" type="date" aria-label="종료일" />
+            </div>
+            <button class="query-btn">조회</button>
+            <div class="order" aria-label="정렬">
+                <span>• 최근 등록순</span>
+                <span>• 오래된 순</span>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <section class="card" aria-labelledby="listHeading">
+            <h2 id="listHeading" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">상담 내역 목록</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:12%">이름</th>
+                        <th style="width:14%">생년월일</th>
+                        <th style="width:14%">상담 상태</th>
+                        <th style="width:10%">상담 횟수</th>
+                        <th style="width:14%">상담 유형</th>
+                        <th>메모</th>
+                        <th style="width:9%">확인</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>서연수</td>
+                        <td>2004.10.24</td>
+                        <td><span class="status progress">진행 중</span></td>
+                        <td>5회</td>
+                        <td><span class="type-badge">심리상담</span></td>
+                        <td class="memo">대화는 잘하지만 감정 표현이 서툼</td>
+                        <td><button class="confirm-btn">확인</button></td>
+                    </tr>
+                    <tr>
+                        <td>전유정</td>
+                        <td>2004.10.24</td>
+                        <td><span class="status progress">진행 중</span></td>
+                        <td>3회</td>
+                        <td><span class="type-badge">가족상담</span></td>
+                        <td class="memo">가족과의 갈등 언급이 잦음</td>
+                        <td><button class="confirm-btn">확인</button></td>
+                    </tr>
+                    <tr>
+                        <td>이서형</td>
+                        <td>2004.10.24</td>
+                        <td><span class="status progress">진행 중</span></td>
+                        <td>1회</td>
+                        <td><span class="type-badge">가족상담</span></td>
+                        <td class="memo">낯가림 심하고 말수가 적음</td>
+                        <td><button class="confirm-btn">확인</button></td>
+                    </tr>
+                    <tr>
+                        <td>조영우</td>
+                        <td>2004.10.24</td>
+                        <td><span class="status stop">중절</span></td>
+                        <td>10회</td>
+                        <td><span class="type-badge">심리상담</span></td>
+                        <td class="memo">자기 주장 강하고 토론을 좋아함</td>
+                        <td><button class="confirm-btn">확인</button></td>
+                    </tr>
+                    <tr>
+                        <td>이영준</td>
+                        <td>2004.10.24</td>
+                        <td><span class="status done">종결</span></td>
+                        <td>8회</td>
+                        <td><span class="type-badge">심리상담</span></td>
+                        <td class="memo">스트레스 받으면 예민해짐</td>
+                        <td><button class="confirm-btn">확인</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="table-actions">
+                <button class="add-target">+ 새로운 대상자 추가하기</button>
+            </div>
+        </section>
+
+        <!-- Footer icon menu -->
+        <footer>
+            <div class="container footer-grid">
+                <div class="category">서비스 카테고리</div>
+                <div class="icon-row">
+                    <div class="icon-card">
+                        <div class="icon">SV</div>
+                        <div class="icon-label">슈퍼비전</div>
+                    </div>
+                    <div class="icon-card">
+                        <div class="icon">CR</div>
+                        <div class="icon-label">상담 기록 조회</div>
+                    </div>
+                    <div class="icon-card">
+                        <div class="icon">MY</div>
+                        <div class="icon-label">마이페이지</div>
+                    </div>
+                    <div class="icon-card">
+                        <div class="icon">GD</div>
+                        <div class="icon-label">작성 가이드</div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+</body>
+</html>
+
+
